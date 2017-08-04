@@ -1,8 +1,8 @@
 class Bundle
 
-	def initialize(name, code)
-		@name = name
-		@code = code
+	def initialize(items, price)
+		@items = items
+		@price = price
 	end
 
 end
