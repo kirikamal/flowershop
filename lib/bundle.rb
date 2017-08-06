@@ -1,8 +1,9 @@
 class Bundle
 
-	attr_accessor :items, :price
+	attr_accessor :name, :items, :price
 
-	def initialize(items, price)
+	def initialize(name, items, price)
+		@name = name
 		@items = items
 		@price = price
 	end
