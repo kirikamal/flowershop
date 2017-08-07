@@ -4,68 +4,87 @@ class Order
 	def initialize
 		@line_items = {}
 		@bundles = []
+		# @buckets = {}
 	end
 
 	def add_item(item, quantity)
-		line_items[item.name] = { item: item, quantity: quantity }
+		line_items[item.code] = {
+			item: item,
+			quantity: quantity,
+			bundles: bundles_for_item(item, quantity)
+		}
 	end
 
-	def	calculate_bundles
-		bundles = []
-		# wwe need to check the bundle sizes for each line item type
-		line_items.each do |key, item|
-			puts "#{key}, (#{item[:item]}, #{item[:quantity]})"
-			puts bundles_for_item(item)
-		end
+	def bundle_for_item(item, quantity)
+		item.bundles.find { |bundle| bundle.quantity == quantity }
 	end
 
 	def bundle_options_for_item(item)
-		# Array - 5 item roses, 10 items roses, 3 item litllie
-		item[:item].bundles.map(&:items)
+		item.bundles.map(&:quantity)
 	end
 
-	def bundles_for_item(item)
+	def bundles_for_item(item, quantity)
 		buckets_high_to_low = bundle_options_for_item(item).sort.reverse
-		puts "foo: " + item.inspect
-		quantity = item[:quantity]
+
+		buckets = {}
 
 		while quantity > 0
 			buckets_high_to_low.each do |bucket_size|
-				puts "Rose Count: #{quantity}"
-				puts "Bucket Size: #{bucket_size}"
+				bucket_size_sum = buckets_high_to_low.reduce(:+)
 
+				# if quantity >= bucket_size
+				# 	quantity  = quantity - bucket_size
+				# 	if quantity > bucket_size #9
+				# 	else
+				# 		 if quantity >= next_bucket_size #5
+				# 		 else
+				# 		 	 quantity >= #3
+
+				# 		 end
+				# 	end
+				# 	next
+				# end
+
+			# either here
+			# 1st time , qty 13, bukets [9,5,3]
+
+			# 1st time , qty 13, bukets [3,4,9]
+			# is 13 >= 3+4+9 --- ? no ...
+				bundle = bundle_for_item(item, bucket_size)
 				while quantity >= bucket_size
-					puts "quantity > bucket_size"
+					buckets[bucket_size] ||= { quantity: 0 }
 
-					if bucket_size < quantity
-						puts "bucket_size < quantity"
-						buckets[bucket_size] += 1
+					# if bucket_size < quantity
+						buckets[bucket_size][:quantity] += 1
+						buckets[bucket_size][:bundle] ||= bundle
 						quantity -= bucket_size
-					elsif bucket_size >= quantity
-						puts "bucket_size >= quantity"
-						buckets[bucket_size] += 1
-						quantity -= bucket_size
-					else
-						break
-					end
+					# elsif bucket_size >= quantity
+					# 	buckets[bucket_size][:quantity] += 1
+					# 	buckets[bucket_size][:bundle] ||= bundle
+					# 	quantity -= bucket_size
+					# 	redo
+					# else
+						# break
+					# end
 				end
 			end
 
-			puts buckets.inspect
-			puts "Left over roses: #{quantity}"
-
 			break
-			# rose_count -= someval
-			# rose_count = 0
 		end
+
+		buckets
 	end
-	
+
 	def line_items_count
 		line_items.count
 	end
 
 	def	total_cost
-		line_items.values.map{ |item| item[:item].price }.reduce(:+)
+		line_items.values.map do |item|
+			item[:bundles].map do |bundle_size, details|
+				details[:bundle].price * details[:quantity]
+			end.reduce(:+)
+		end.reduce(:+)
 	end
 
 	def	items_count
@@ -73,15 +92,21 @@ class Order
 	end
 
 	def	receipt
-		puts line_items.inspect
-	end
+		puts "Order contains #{items_count} total items:"
 
-	def getb_bundle(number_of_items, code_of_product)
-		
-		# Get the product
+		line_items.each do |(item_code, line_item)|
+			item = line_item[:item]
+			quantity = line_item[:quantity]
+			bundles = line_item[:bundles]
+			line_total = bundles.values.map { |value| value[:bundle].price }.reduce(:+)
 
-		# breakdown into optimized bundles
 
-		# return the result
+			puts "#{quantity} #{item.code} $#{line_total}"
+			bundles.each do |bundle_size, details|
+				puts "    #{details[:quantity]} x #{bundle_size} $#{details[:bundle].price}"
+			end
+		end
+
+		puts "Total cost: $#{total_cost}"
 	end
 end

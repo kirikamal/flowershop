@@ -4,3 +4,8 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'byebug'
+
+group :test do
+  gem "guard-rspec"
+  gem "rspec"
+end
