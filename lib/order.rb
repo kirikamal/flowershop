@@ -32,40 +32,12 @@ class Order
 			buckets_high_to_low.each do |bucket_size|
 				bucket_size_sum = buckets_high_to_low.reduce(:+)
 
-				# if quantity >= bucket_size
-				# 	quantity  = quantity - bucket_size
-				# 	if quantity > bucket_size #9
-				# 	else
-				# 		 if quantity >= next_bucket_size #5
-				# 		 else
-				# 		 	 quantity >= #3
-
-				# 		 end
-				# 	end
-				# 	next
-				# end
-
-			# either here
-			# 1st time , qty 13, bukets [9,5,3]
-
-			# 1st time , qty 13, bukets [3,4,9]
-			# is 13 >= 3+4+9 --- ? no ...
 				bundle = bundle_for_item(item, bucket_size)
 				while quantity >= bucket_size
 					buckets[bucket_size] ||= { quantity: 0 }
-
-					# if bucket_size < quantity
-						buckets[bucket_size][:quantity] += 1
-						buckets[bucket_size][:bundle] ||= bundle
-						quantity -= bucket_size
-					# elsif bucket_size >= quantity
-					# 	buckets[bucket_size][:quantity] += 1
-					# 	buckets[bucket_size][:bundle] ||= bundle
-					# 	quantity -= bucket_size
-					# 	redo
-					# else
-						# break
-					# end
+					buckets[bucket_size][:quantity] += 1
+					buckets[bucket_size][:bundle] ||= bundle
+					quantity -= bucket_size
 				end
 			end
 
@@ -100,8 +72,7 @@ class Order
 			bundles = line_item[:bundles]
 			line_total = bundles.values.map { |value| value[:bundle].price }.reduce(:+)
 
-
-			puts "#{quantity} #{item.code} $#{line_total}"
+			puts "#{quantity} #{item.code} #{line_total}"
 			bundles.each do |bundle_size, details|
 				puts "    #{details[:quantity]} x #{bundle_size} $#{details[:bundle].price}"
 			end
